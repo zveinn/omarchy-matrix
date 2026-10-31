@@ -74,7 +74,9 @@ PanelWindow {
       x: gx - fx.modelData.x - fx.band; y: gy - fx.modelData.y - fx.band
       width: gw + 2 * fx.band; height: gh + 2 * fx.band
       property real boost: 0
-      property real time: (act ? fx.activeTime : fx.idleTime) + boost + index * 3.7
+      // kept small: the shader hashes sin(tick * ...), which loses float32 precision
+      // (glyphs freeze) once time grows into the thousands after a few hours
+      property real time: ((act ? fx.activeTime : fx.idleTime) + boost + index * 3.7) % 256
       property real prog: 0
       property real fade: 0
       property real cell: fx.band
@@ -103,13 +105,13 @@ PanelWindow {
         NumberAnimation { target: ring; property: "prog"; from: 0; to: 1; duration: 380; easing.type: Easing.OutCubic }
       }
       // faster scramble during the race-in
-      FrameAnimation { running: intro.running; onTriggered: ring.boost += frameTime * 0.6 }
+      FrameAnimation { running: intro.running; onTriggered: ring.boost = (ring.boost + frameTime * 0.6) % 256 }
     }
   }
 
   // focused ring scrambles a bit faster than the idle ones
-  Timer { interval: 70;  repeat: true; running: fx.visible && rings.count > 0; onTriggered: fx.activeTime += 0.035 }
-  Timer { interval: 220; repeat: true; running: fx.visible && rings.count > 0; onTriggered: fx.idleTime += 0.03 }
+  Timer { interval: 70;  repeat: true; running: fx.visible && rings.count > 0; onTriggered: fx.activeTime = (fx.activeTime + 0.035) % 256 }
+  Timer { interval: 220; repeat: true; running: fx.visible && rings.count > 0; onTriggered: fx.idleTime = (fx.idleTime + 0.03) % 256 }
 
   // ask hyprland.lua to resend the ring list after this process (re)starts
   Process {
