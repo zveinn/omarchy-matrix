@@ -186,12 +186,22 @@ end
 -- older versions of this theme (they made the green line flash on alt+tab).
 local HIDDEN = "rgba(00000000)"
 local function hide_border(w)
-  pcall(hl.dispatch, hl.dsp.window.set_prop({ prop = "active_border_color", value = HIDDEN, window = w }))
+  -- build the dispatcher INSIDE the pcall: switching to an empty workspace
+  -- fires window.active with an expired window object, and the window
+  -- selector throws "window object is expired" while the argument is built
+  pcall(function()
+    hl.dispatch(hl.dsp.window.set_prop({ prop = "active_border_color", value = HIDDEN, window = w }))
+  end)
 end
 for _, w in ipairs(hl.get_windows()) do hide_border(w) end
 
 hl.on("window.active", function(w)
-  if w then hide_border(w) end
+  -- On an empty workspace this fires with an expired window object (or nil);
+  -- handing that to a window selector raises "window selector: window object
+  -- is expired" (Hyprland logs it even inside pcall). Only touch the border
+  -- when there really is a live active window, and use that fresh object.
+  local aw = w and hl.get_active_window()
+  if aw then hide_border(aw) end
   update(true)
 end)
 -- the rain process calls this on startup so the ring is redrawn after a restart
