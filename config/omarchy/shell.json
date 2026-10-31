@@ -7,14 +7,14 @@
   "bar": {
     "position": "top",
     "transparent": false,
-    "centerAnchor": "sveinn.clock",
+    "centerAnchor": "matrix.clock",
     "layout": {
       "left": [
         {
-          "id": "sveinn.menu"
+          "id": "matrix.menu"
         },
         {
-          "id": "sveinn.workspaces"
+          "id": "matrix.workspaces"
         }
       ],
       "center": [
@@ -22,7 +22,7 @@
           "id": "omarchy.indicators"
         },
         {
-          "id": "sveinn.clock",
+          "id": "matrix.clock",
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
           "verticalFormat": "HH\n—\nmm"
@@ -31,7 +31,7 @@
           "id": "omarchy.keyboard-layout"
         },
         {
-          "id": "sveinn.weather"
+          "id": "matrix.weather"
         },
         {
           "id": "omarchy.system-update"
@@ -39,30 +39,30 @@
       ],
       "right": [
         {
-          "id": "sveinn.tray"
+          "id": "matrix.tray"
         },
         {
-          "id": "sveinn.agents"
+          "id": "matrix.agents"
         },
         {
-          "id": "sveinn.bluetooth"
+          "id": "matrix.bluetooth"
         },
         {
-          "id": "sveinn.network"
+          "id": "matrix.network"
         },
         {
-          "id": "sveinn.audio"
+          "id": "matrix.audio"
         },
         {
-          "id": "sveinn.monitor"
+          "id": "matrix.monitor"
         },
         {
-          "id": "sveinn.power",
+          "id": "matrix.power",
           "showPercentage": false
         }
       ]
     },
-    "id": "sveinn.bar",
+    "id": "matrix.bar",
     "autoHide": true,
     "autoHideDelay": 500,
     "autoHidePeek": false
@@ -72,6 +72,6 @@
     "omarchy.menu"
   ],
   "cloneSourceRestores": [
-    "sveinn.menu"
+    "matrix.menu"
   ]
 }

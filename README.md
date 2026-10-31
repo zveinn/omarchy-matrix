@@ -29,12 +29,12 @@ A complete "Matrix" setup for [Omarchy](https://omarchy.org) (Hyprland 0.56 with
 - Opening, closing, fullscreen/floating toggles and workspace switches: windows decode out of a block of glyphs that flare white and dissolve cell by cell.
 - Bar panels, tray menus and the launcher open and close with the same decode. In the launcher, entries decode in staggered, typing churns new characters in, and moving the selection plays a phosphor sweep.
 
-**Top bar** (`plugins/sveinn.*`)
+**Top bar** (`plugins/matrix.*`)
 - Matrix-animated clones of the stock widgets: clock/calendar, weather, tray (and the tray-icons manager), workspaces, agents, bluetooth, network, audio, monitor and power. Live values are white and labels green.
 - Each plugin has a `matrixFx` setting: `theme` (only on the matrix theme), `always` or `off`.
-- **Auto-hide.** The bar itself is `plugins/sveinn.bar`, a clone of the stock `omarchy.bar` (selected with `bar.id` in `shell.json`) that adds auto-hide. The bar reserves no space, so windows use the full height. It slides in (200 ms) when the pointer touches the top edge, and stays up while the pointer is on it or while any bar panel, tray menu or the launcher is open. It slides away 500 ms after the pointer leaves. Configure it in `shell.json` under `bar`: `autoHide` (default on in this setup), `autoHideDelay` (ms) and `autoHidePeek` (also flash the bar for about 0.9 s on every workspace switch; off by default). `omarchy-toggle-bar` still hides the bar completely.
+- **Auto-hide.** The bar itself is `plugins/matrix.bar`, a clone of the stock `omarchy.bar` (selected with `bar.id` in `shell.json`) that adds auto-hide. The bar reserves no space, so windows use the full height. It slides in (200 ms) when the pointer touches the top edge, and stays up while the pointer is on it or while any bar panel, tray menu or the launcher is open. It slides away 500 ms after the pointer leaves. Configure it in `shell.json` under `bar`: `autoHide` (default on in this setup), `autoHideDelay` (ms) and `autoHidePeek` (also flash the bar for about 0.9 s on every workspace switch; off by default). `omarchy-toggle-bar` still hides the bar completely.
 
-**Launcher** (`plugins/sveinn.menu`)
+**Launcher** (`plugins/matrix.menu`)
 - A clone of `omarchy.menu`. Its manifest says `clonedFrom: omarchy.menu`, and `shell.json` disables `omarchy.menu`, so the shell routes every `omarchy-menu`, `omarchy-menu-select` and `omarchy-menu-input` call to it. No extra wiring is needed.
 
 **Screensaver**
@@ -62,7 +62,7 @@ How it behaves:
 - **No sudo, home only.** It writes only under `$HOME` and refuses anything else, including `/usr/share/omarchy`.
 - **Idempotent.** Files that already match are skipped, so re-running is a no-op. Stray `*.bak*`, `*.canvas` and `*-pre-*` files in an installed copy are ignored when comparing.
 - **Backups.** Anything it replaces is moved to `~/.cache/omarchy-matrix-backup/<timestamp>/files/`, and a `manifest` records what was replaced and what was new. `--uninstall` uses that manifest: it restores replaced files, deletes new ones, puts the branding links back and stops the rain. Afterwards, pick another theme with `omarchy-theme-set <name>`.
-- **`shell.json`.** When `jq` is available, it merges into your existing file: it takes this setup's `bar` section (top position, `id: sveinn.bar` with the auto-hide keys, and the widget layout), adds `omarchy.menu` to `disabledPlugins`, adds `sveinn.menu` to `cloneSourceRestores`, and keeps everything else (idle timers, other plugins). Without `jq` it replaces the file, with a backup.
+- **`shell.json`.** When `jq` is available, it merges into your existing file: it takes this setup's `bar` section (top position, `id: matrix.bar` with the auto-hide keys, and the widget layout), adds `omarchy.menu` to `disabledPlugins`, adds `matrix.menu` to `cloneSourceRestores`, and keeps everything else (idle timers, other plugins). Without `jq` it replaces the file, with a backup.
 - **Symlinked configs.** If a config such as `looknfeel.lua` is a symlink (for example into a dotfiles repo), it never writes through the link. A link that already points at identical content is left alone. Otherwise the link itself is backed up and replaced by a regular file, so the other repo is never modified, and `--uninstall` restores the link.
 - **Requirements.** Needs `hyprctl`, `quickshell`, `omarchy-shell`, `omarchy-theme-set` and `omarchy-restart-shell`. It warns about optional tools (`jq`, `fc-cache`, `ghostty`). Shaders ship precompiled (`*.qsb`), so `qsb` is not needed.
 
@@ -74,8 +74,8 @@ How it behaves:
 | `theme/rain/` | The Quickshell overlay process: `shell.qml` (rain + overlays), `FocusFx.qml` (glyph ring), `TransitionFx.qml` (decode effects), shaders (`*.frag` + compiled `*.qsb`), and the `matrix-rain start\|stop\|restart\|status` script |
 | `theme/screensaver/` | Screensaver (`shell.qml`, `matrix-screensaver`). `rain.frag.qsb` is a relative symlink to `../rain/rain.frag.qsb` |
 | `theme/src/` | Generator script and logo art (not loaded at runtime) |
-| `plugins/sveinn.bar` | `~/.config/omarchy/plugins/`: the bar itself (stock `omarchy.bar` clone + auto-hide, see its README) |
-| `plugins/sveinn.*` | `~/.config/omarchy/plugins/`: bar widgets and launcher. Each one is self-contained with its own `fx/` (GlyphDecode, GlyphRing, PanelRing/PanelFx or MenuFx, plus shader copies) |
+| `plugins/matrix.bar` | `~/.config/omarchy/plugins/`: the bar itself (stock `omarchy.bar` clone + auto-hide, see its README) |
+| `plugins/matrix.*` | `~/.config/omarchy/plugins/`: bar widgets and launcher. Each one is self-contained with its own `fx/` (GlyphDecode, GlyphRing, PanelRing/PanelFx or MenuFx, plus shader copies) |
 | `hooks/` | `~/.config/omarchy/hooks/{theme-set.d,post-boot.d}`: starts or stops the rain on theme switch and at boot, and swaps the about/screensaver branding art |
 | `bin/omarchy-launch-screensaver` | `~/.local/bin/` |
 | `config/omarchy/shell.json` | `~/.config/omarchy/shell.json` (merged, see above) |

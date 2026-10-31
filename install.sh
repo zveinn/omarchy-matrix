@@ -157,8 +157,8 @@ check_deps() {
 }
 
 # shell.json: keep the user's file, but take this setup's bar settings (bar.id =
-# sveinn.bar with autoHide, layout) and make sure omarchy.menu is disabled so the
-# launcher routes to sveinn.menu. --no-autohide turns bar.autoHide off.
+# matrix.bar with autoHide, layout) and make sure omarchy.menu is disabled so the
+# launcher routes to matrix.menu. --no-autohide turns bar.autoHide off.
 install_shell_json() {
   local src="$HERE/config/omarchy/shell.json" dest="$HOME/.config/omarchy/shell.json" srctmp=""
   if ((!AUTOHIDE)); then
@@ -174,7 +174,9 @@ install_shell_json() {
   if [[ -f $dest && ! -L $dest ]] && command -v jq >/dev/null 2>&1 && jq -e . "$dest" >/dev/null 2>&1; then
     local tmp
     tmp="$(mktemp)"
-    jq -s '
+    local legacy='[]'
+    if ((${#LEGACY_IDS[@]})); then legacy="$(printf '%s\n' "${LEGACY_IDS[@]}" | jq -R . | jq -sc .)"; fi
+    jq -s --argjson legacy "$legacy" '
       .[0] as $u | .[1] as $m
       | $u
       | .bar = (($u.bar // {}) * $m.bar)
@@ -182,6 +184,11 @@ install_shell_json() {
       | .disabledPlugins = ((($u.disabledPlugins // []) + ($m.disabledPlugins // [])) | unique)
       | .cloneSourceRestores = ((($u.cloneSourceRestores // []) + ($m.cloneSourceRestores // [])) | unique)
       | .version = ($u.version // $m.version)
+      | .disabledPlugins -= $legacy
+      | .cloneSourceRestores -= $legacy
+      | if (.plugins | type) == "array"
+        then .plugins |= map(select(((if type == "object" then .id else . end) as $i | $legacy | index($i)) == null))
+        else . end
     ' "$dest" "$src" > "$tmp"
     printf '    (merged bar settings/layout + disabledPlugins into your shell.json)\n'
     put "$tmp" "$dest"
@@ -190,6 +197,45 @@ install_shell_json() {
     put "$src" "$dest"
   fi
   [[ -z $srctmp ]] || rm -f "$srctmp"
+}
+
+# Older versions of this setup shipped the same plugins under another id prefix.
+# Retire those copies so they don't compete with the matrix.* ones (two clones
+# of omarchy.menu would fight over launcher routing). An old copy is a plugin dir
+# <prefix>.<name> where this repo ships matrix.<name>, whose manifest is cloned
+# from the same omarchy.* plugin, and which carries this setup's effects
+# (fx/MatrixGate.qml, or the auto-hide bar). It is moved into the install backup,
+# so --uninstall puts it back. Its ids are dropped from shell.json later.
+LEGACY_IDS=()
+migrate_legacy_plugins() {
+  local dir="$HOME/.config/omarchy/plugins" src base name want d old got id
+  [[ -d $dir ]] || return 0
+  command -v jq >/dev/null 2>&1 || { warn "jq not found: not checking for old-named copies of these plugins"; return 0; }
+  for src in "$HERE"/plugins/matrix.*/; do
+    src="${src%/}"; base="$(basename "$src")"; name="${base#matrix.}"
+    want="$(jq -r '.omarchy.clonedFrom // empty' "$src/manifest.json" 2>/dev/null)" || continue
+    [[ -n $want ]] || continue
+    for d in "$dir"/*."$name"; do
+      [[ -d $d && ! -L $d && -f $d/manifest.json ]] || continue
+      old="$(basename "$d")"
+      [[ $old == "$base" || $old == omarchy.* || $old != *.*  ]] && continue
+      got="$(jq -r '.omarchy.clonedFrom // empty' "$d/manifest.json" 2>/dev/null)" || continue
+      [[ $got == "$want" ]] || continue
+      [[ -f $d/fx/MatrixGate.qml ]] || grep -qs 'autoHideHeld' "$d/Bar.qml" || continue
+      guard "$d"
+      id="$(jq -r '.id // empty' "$d/manifest.json" 2>/dev/null)" || id=""
+      LEGACY_IDS+=("$old")
+      [[ -n $id && $id != "$old" ]] && LEGACY_IDS+=("$id")
+      start_backup
+      printf '    ~ %s (old name of %s; moved to the backup)\n' "$(rel "$d")" "$base"
+      if ((!DRY)); then
+        mkdir -p "$BACKUP/files/$(dirname "$(rel "$d")")"
+        mv "$d" "$BACKUP/files/$(rel "$d")"
+        printf 'R\t%s\n' "$(rel "$d")" >> "$MANIFEST"
+      fi
+    done
+  done
+  return 0
 }
 
 install_all() {
@@ -202,6 +248,7 @@ install_all() {
   say "Bar widgets + launcher plugins -> ~/.config/omarchy/plugins"
   local p
   for p in "$HERE"/plugins/*/; do p="${p%/}"; put "$p" "$HOME/.config/omarchy/plugins/$(basename "$p")"; done
+  migrate_legacy_plugins
 
   say "Hooks -> ~/.config/omarchy/hooks"
   local h d
@@ -218,7 +265,7 @@ install_all() {
   done
   case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) warn "$HOME/.local/bin is not on PATH; the matrix screensaver override won't be used" ;; esac
 
-  say "Shell config (bar layout, launcher = sveinn.menu)"
+  say "Shell config (bar layout, launcher = matrix.menu)"
   install_shell_json
 
   if ((LOOKNFEEL)); then
