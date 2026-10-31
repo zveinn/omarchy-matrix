@@ -89,7 +89,7 @@ How it behaves:
 - After editing a shader: `/usr/lib/qt6/bin/qsb --glsl "100 es,120,150" --hlsl 50 --msl 12 -o X.frag.qsb X.frag`
 - After editing `theme/hyprland.lua`: run `omarchy-theme-set matrix` again.
 - Weather uses Omarchy's own location setting (`omarchy-weather-location`, stored in `~/.local/state/omarchy/settings/weather.json`), so no location ships in this repo.
-- Neovim is intentionally not themed.
+- Neovim is deliberately left alone: `theme/neovim.lua` just keeps a stock colorscheme (tokyonight).
 
 ## Credits
 
