@@ -61,7 +61,11 @@
           "showPercentage": false
         }
       ]
-    }
+    },
+    "id": "sveinn.bar",
+    "autoHide": true,
+    "autoHideDelay": 500,
+    "autoHidePeek": false
   },
   "plugins": [],
   "disabledPlugins": [

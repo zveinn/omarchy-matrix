@@ -5,6 +5,7 @@
 #   ./install.sh --no-activate   install files only; don't switch theme / restart anything
 #   ./install.sh --dry-run       print what would happen, change nothing
 #   ./install.sh --no-looknfeel  leave ~/.config/hypr/looknfeel.lua alone
+#   ./install.sh --no-autohide   keep the top bar always visible (bar.autoHide=false)
 #   ./install.sh --uninstall     undo the most recent install from its backup
 #
 # Everything is written under $HOME only (never /usr/share/omarchy, never sudo).
@@ -19,14 +20,15 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 BACKUP="$BACKUP_ROOT/$STAMP"
 MANIFEST="$BACKUP/manifest"
 
-DRY=0 ACTIVATE=1 LOOKNFEEL=1 MODE=install
+DRY=0 ACTIVATE=1 LOOKNFEEL=1 AUTOHIDE=1 MODE=install
 for arg in "$@"; do
   case "$arg" in
     --dry-run|-n) DRY=1 ;;
     --no-activate) ACTIVATE=0 ;;
     --no-looknfeel) LOOKNFEEL=0 ;;
+    --no-autohide) AUTOHIDE=0 ;;
     --uninstall) MODE=uninstall ;;
-    -h|--help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $arg (see --help)" >&2; exit 2 ;;
   esac
 done
@@ -154,10 +156,21 @@ check_deps() {
   return 0
 }
 
-# shell.json: keep the user's file, but take this setup's bar layout and make
-# sure omarchy.menu is disabled so the launcher routes to sveinn.menu.
+# shell.json: keep the user's file, but take this setup's bar settings (bar.id =
+# sveinn.bar with autoHide, layout) and make sure omarchy.menu is disabled so the
+# launcher routes to sveinn.menu. --no-autohide turns bar.autoHide off.
 install_shell_json() {
-  local src="$HERE/config/omarchy/shell.json" dest="$HOME/.config/omarchy/shell.json"
+  local src="$HERE/config/omarchy/shell.json" dest="$HOME/.config/omarchy/shell.json" srctmp=""
+  if ((!AUTOHIDE)); then
+    if command -v jq >/dev/null 2>&1; then
+      srctmp="$(mktemp)"
+      jq '.bar.autoHide = false' "$src" > "$srctmp"
+      src="$srctmp"
+      printf '    (--no-autohide: bar.autoHide = false)\n'
+    else
+      warn "--no-autohide needs jq; set \"autoHide\": false under \"bar\" in ~/.config/omarchy/shell.json yourself"
+    fi
+  fi
   if [[ -f $dest && ! -L $dest ]] && command -v jq >/dev/null 2>&1 && jq -e . "$dest" >/dev/null 2>&1; then
     local tmp
     tmp="$(mktemp)"
@@ -170,12 +183,13 @@ install_shell_json() {
       | .cloneSourceRestores = ((($u.cloneSourceRestores // []) + ($m.cloneSourceRestores // [])) | unique)
       | .version = ($u.version // $m.version)
     ' "$dest" "$src" > "$tmp"
-    printf '    (merged bar layout + disabledPlugins into your shell.json)\n'
+    printf '    (merged bar settings/layout + disabledPlugins into your shell.json)\n'
     put "$tmp" "$dest"
     rm -f "$tmp"
   else
     put "$src" "$dest"
   fi
+  [[ -z $srctmp ]] || rm -f "$srctmp"
 }
 
 install_all() {
