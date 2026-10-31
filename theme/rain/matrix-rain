@@ -1,0 +1,14 @@
+#!/bin/bash
+# matrix-rain start|stop|restart|status — live digital rain layer for the matrix theme.
+DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+QML="$HOME/.config/omarchy/themes/matrix/rain/shell.qml"
+running() { pgrep -f "quickshell .*-p $QML" >/dev/null; }
+case "${1:-start}" in
+  start)
+    [[ $(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null) == matrix ]] || exit 0
+    [[ -f $HOME/.config/omarchy/themes/matrix/rain/disabled ]] && exit 0
+    running || setsid -f quickshell -n -p "$QML" >/dev/null 2>&1 </dev/null ;;
+  stop) pkill -f "quickshell .*-p $QML" ; true ;;
+  restart) "$0" stop; sleep 0.3; "$0" start ;;
+  status) running && echo running || echo stopped ;;
+esac

@@ -1,0 +1,37 @@
+# ░▒▓ MATRIX ▓▒░  green phosphor on deep black. "There is no spoon."
+mode = "dark"
+
+accent = "#00ff41"
+selection = "#003b00"
+muted = "#3d7a48"
+
+background = "#000a02"
+dark_background = "#000602"
+darker_background = "#000301"
+lighter_background = "#021a08"
+
+foreground = "#d9dde3"
+dark_foreground = "#5f9f6c"
+light_foreground = "#e6e9ee"
+bright_foreground = "#f5f7fa"
+
+# ANSI: still distinguishable, but every hue is pulled toward the phosphor.
+red = "#d65a4a"
+yellow = "#d4ff3f"
+orange = "#ffb000"
+green = "#00ff41"
+cyan = "#00e5b4"
+blue = "#3fb5d6"
+magenta = "#b395d9"
+brown = "#6b5a1e"
+
+bright_red = "#ff7a66"
+bright_yellow = "#e8ff8a"
+bright_green = "#7dff9a"
+bright_cyan = "#6effd6"
+bright_blue = "#7fd8f0"
+bright_magenta = "#d2bdf0"
+
+# Phosphor gradient for popups, notifications and the lock screen
+hyprland_active_border = "#00ff41 #008f11 #003b00 #00ff41 45deg"
+hyprland_inactive_border = "#0a2a10"

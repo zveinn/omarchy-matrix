@@ -1,0 +1,5 @@
+#!/bin/bash
+# Start the matrix theme's live digital rain after login (no-op unless matrix is active).
+R="$HOME/.config/omarchy/themes/matrix/rain/matrix-rain"
+[[ -x $R ]] && "$R" start
+exit 0

@@ -1,0 +1,23 @@
+#!/bin/bash
+# Matrix theme branding swap (installed with ~/.config/omarchy/themes/matrix).
+# about.txt / screensaver.txt are normally symlinks into the dotfiles repo; we never
+# write through them. On `matrix` the link is re-pointed at the theme's art (old target
+# saved in *.link-pre-matrix); on any other theme the original link/file is restored.
+THEME="${1:-}"
+B="$HOME/.config/omarchy/branding"
+T="$HOME/.config/omarchy/themes/matrix/branding"
+[[ -d $T ]] || exit 0
+for f in about screensaver; do
+  src="$T/$f.txt"; dst="$B/$f.txt"; bak="$B/$f.txt.bak-pre-matrix"; link="$B/$f.txt.link-pre-matrix"
+  [[ -f $src ]] || continue
+  ours=false; [[ -L $dst && $(readlink "$dst") == "$src" ]] && ours=true
+  if [[ $THEME == matrix ]]; then
+    $ours && continue
+    if [[ -L $dst ]]; then readlink "$dst" > "$link"; elif [[ -f $dst ]]; then cp -p "$dst" "$bak"; rm -f "$link"; fi
+    ln -sfn "$src" "$dst"
+  elif $ours; then
+    if [[ -s $link ]]; then ln -sfn "$(cat "$link")" "$dst"
+    elif [[ -f $bak ]]; then rm -f "$dst"; cp -p "$bak" "$dst"; fi
+  fi
+done
+exit 0

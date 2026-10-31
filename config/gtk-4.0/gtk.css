@@ -1,0 +1,27 @@
+/* Pure black backgrounds for every GTK4 / libadwaita app (Nautilus etc.), any theme */
+@define-color window_bg_color #000000;
+@define-color view_bg_color #000000;
+@define-color headerbar_bg_color #000000;
+@define-color headerbar_backdrop_color #000000;
+@define-color sidebar_bg_color #000000;
+@define-color sidebar_backdrop_color #000000;
+@define-color secondary_sidebar_bg_color #000000;
+@define-color secondary_sidebar_backdrop_color #000000;
+@define-color card_bg_color #050505;
+@define-color popover_bg_color #050505;
+@define-color dialog_bg_color #050505;
+@define-color thumbnail_bg_color #050505;
+:root {
+  --window-bg-color: #000000;
+  --view-bg-color: #000000;
+  --headerbar-bg-color: #000000;
+  --headerbar-backdrop-color: #000000;
+  --sidebar-bg-color: #000000;
+  --sidebar-backdrop-color: #000000;
+  --secondary-sidebar-bg-color: #000000;
+  --secondary-sidebar-backdrop-color: #000000;
+  --card-bg-color: #050505;
+  --popover-bg-color: #050505;
+  --dialog-bg-color: #050505;
+  --thumbnail-bg-color: #050505;
+}

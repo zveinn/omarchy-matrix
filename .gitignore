@@ -1,0 +1,20 @@
+# local backups and scratch copies
+*.bak
+*.bak-*
+*.bak.*
+.bak-*/
+*-pre-*
+*.canvas
+*.orig
+*.rej
+*~
+.*.swp
+# caches
+*.qmlc
+*.jsc
+__pycache__/
+.cache/
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

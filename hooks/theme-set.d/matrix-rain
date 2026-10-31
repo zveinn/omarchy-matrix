@@ -1,0 +1,6 @@
+#!/bin/bash
+# Live digital rain for the matrix theme: run only while matrix is the active theme.
+R="$HOME/.config/omarchy/themes/matrix/rain/matrix-rain"
+[[ -x $R ]] || exit 0
+if [[ ${1:-} == matrix ]]; then "$R" start; else "$R" stop; fi
+exit 0

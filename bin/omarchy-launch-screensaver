@@ -1,0 +1,20 @@
+#!/bin/bash
+# User override of /usr/share/omarchy/bin/omarchy-launch-screensaver (wins via PATH:
+# ~/.local/bin precedes /usr/share/omarchy/bin, also in the shell's idle service `bash -lc`).
+# On the matrix theme: the wallpaper's digital rain, fullscreen, no text. Otherwise: stock.
+SS="$HOME/.config/omarchy/themes/matrix/screensaver/matrix-screensaver"
+STOCK=/usr/share/omarchy/bin/omarchy-launch-screensaver
+if [[ $(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null) != matrix || ! -x $SS ]] ||
+  ! command -v quickshell >/dev/null; then
+  exec "$STOCK" "$@"
+fi
+
+# Exit early if screensaver is already running
+pgrep -f '[o]rg.omarchy.screensaver' && exit 0
+
+# Allow screensaver to be turned off but also force started
+if omarchy-toggle-enabled screensaver-off && [[ $1 != "force" ]]; then
+  exit 1
+fi
+
+setsid -f "$SS" org.omarchy.screensaver >/dev/null 2>&1 </dev/null

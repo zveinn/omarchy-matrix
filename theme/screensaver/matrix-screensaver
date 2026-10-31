@@ -1,0 +1,14 @@
+#!/bin/bash
+# Runs the matrix-rain screensaver (./shell.qml). Started by omarchy-launch-screensaver as
+#   matrix-screensaver org.omarchy.screensaver
+# so `pgrep/pkill -f org.omarchy.screensaver` (launcher guard, omarchy-system-lock) see it.
+QML="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)/shell.qml"
+cursor() { hyprctl eval "hl.config({ cursor = { invisible = $1 } })" &>/dev/null || hyprctl keyword cursor:invisible "$1" &>/dev/null || true; }
+pid=
+finish() { [[ -n $pid ]] && kill "$pid" 2>/dev/null; cursor false; exit 0; }
+trap finish SIGINT SIGTERM SIGHUP SIGQUIT EXIT
+cursor true
+# argv[0] carries the class name too, so killing either process ends the screensaver
+bash -c 'exec -a org.omarchy.screensaver quickshell -n -p "$1"' _ "$QML" >/dev/null 2>&1 </dev/null &
+pid=$!
+wait "$pid"
